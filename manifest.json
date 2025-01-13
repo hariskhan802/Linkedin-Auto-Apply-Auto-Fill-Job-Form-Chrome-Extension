@@ -1,0 +1,19 @@
+{
+   "action": {
+      "default_popup": "popup.html",
+      "default_title": "CONFIGURATION"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "jquery-3.7.1.js", "domain.js", "content_utils.js", "create_elements.js", "content.js" ],
+      "matches": [ "\u003Call_urls>" ]
+   } ],
+   "description": "",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjG8tN7oJH4MY2tsGRpKyxfpXoeE4JMPWJpmNcXU/zqvllVlATAMB2QSfFVBVeKimnmumR+CdZTmm2xYIgngou4tvSEB2+4r0hQM8JLrB1h0hYWrnlp+aFmsVwuxbyLG/7FL47giiat5FrDM7MtRXpyt26a9CYliwDq7kA7YXh3I9KgFMRAFQks7T//76gq3cuuWkC2mRMCf7xIQBno7m0u3lbpz29XI2DWcTQEoBDj6BE9juCOz+9tryb1SiDR7VT2zRVRKnF3VuIwyLl/cFOeNZKDxQHkHx/2FimAVwX38gcGiWMot6g5GvlKn0H0QrkwyVTcs2t4s5zG+bjVqfUQIDAQAB",
+   "manifest_version": 3,
+   "name": "Auto Apply",
+   "permissions": [ "storage" ],
+   "version": "1.0.0"
+}

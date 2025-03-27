@@ -652,15 +652,15 @@ function createToggleButton() {
     const toggleButton = document.createElement('button');
     toggleButton.textContent = '▼';
     toggleButton.style.cssText = `
-        background-color: #fff;
-        color: #0077B5.;
-        padding: 5px;
-        border: 1px solid #FFFFFF;
+        background-color: rgb(255, 255, 255);
+        padding: 0px;
         border-radius: 5px;
         cursor: pointer;
         margin-right: 5px;
         margin-bottom: 10px;
-        display: none;
+        color: red;
+        border: 4px solid #9d1b1b;
+        
     `;
     return toggleButton;
 }

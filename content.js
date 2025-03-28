@@ -537,3 +537,17 @@ async function runScript() {
     }
     await goToNextPage();
 }
+window.onload = async() => {
+    const isLinkedIn = window?.location?.href?.includes('linkedin.com');
+    chrome.storage.local.get(['allowExternal'], function(result) {
+        console.log('result.allowExternal', result.allowExternal);
+        
+        if (isLinkedIn === false && (result.allowExternal === false || result.allowExternal === null) ) {
+            const elements = document.querySelectorAll('.linkedin-only')
+            for (let element of elements) {
+                element.style.display = 'none';
+            }
+        }
+    })    
+}
+

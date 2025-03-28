@@ -1,10 +1,10 @@
 const settingsButton = document.getElementById('settings-button');
-settingsButton.addEventListener('click', function() {
+settingsButton.addEventListener('click', function () {
     chrome.tabs.create({ url: 'settings.html' });
 });
 
 const defaultButton = document.getElementById('default-button');
-defaultButton.addEventListener('click', function() {
+defaultButton.addEventListener('click', function () {
     chrome.tabs.create({ url: 'defaultInput.html' });
 });
 
@@ -61,3 +61,36 @@ function exportData() {
 
 // Example: Attach exportData to a button
 document.getElementById('exportButton').addEventListener('click', exportData);
+
+
+const setupToggler = async () => {
+    const { allowExternal } = await chrome.storage.local.get(['allowExternal'])
+    if (allowExternal === false || allowExternal === null) {
+        chrome.storage.local.set({ 'allowExternal': false }, () => {
+        });
+
+        document.querySelector('.allow-external').innerHTML = '<button id="default-button" class="button external-enabler">Enable external</button>'
+    }
+    else {
+        document.querySelector('.allow-external').innerHTML = '<button id="default-button" class="button external-enabler">Disable external</button>'
+    }
+
+
+    const externalEnabler = document.querySelector('.external-enabler')
+    externalEnabler.addEventListener('click', function () {
+        const buttonText = this.textContent
+
+        if (buttonText === 'Enable external') {
+            chrome.storage.local.set({ 'allowExternal': true }, () => {
+                this.textContent = 'Disable external'
+            });
+        }
+        else {
+            chrome.storage.local.set({ 'allowExternal': false }, () => {
+                this.textContent = 'Enable external'
+            });
+        }
+
+    })
+}
+setupToggler()

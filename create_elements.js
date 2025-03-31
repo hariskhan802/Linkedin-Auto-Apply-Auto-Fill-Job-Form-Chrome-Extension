@@ -103,21 +103,15 @@
         const autoFillButton1 = createAutoFill1()
         const autoFillButton2 = createAutoFill2()
         const aiApply = createAiApply()
-    
+        const singleApplyButton = createSingleApplyButton()
         const helpButton = createHelpButton();
     
     
         toggleButton.addEventListener('click', () => {
-            togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply);
+            togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton);
         });
-    
-        // helpButton.addEventListener('click', () => {
-    
-        //     window.open('kahsaasas', '_blank');
-    
-        // });
-    
-        applyButton.addEventListener('click', async () => {
+
+        async function runAutoApplyScript (singleJob = false) {
             runningScript = true;
     
             const currentUrl = window.location.href.includes("www.linkedin.com/jobs/search")
@@ -127,10 +121,17 @@
             }
             else {
     
-                await runScript();
+                await runScript(singleJob);
             }
-        });
+        }
     
+        applyButton.addEventListener('click', async () => {
+            await runAutoApplyScript()
+        });
+        
+        singleApplyButton.addEventListener('click', async () => {
+            await runAutoApplyScript(true)
+        });
     
     
         function extractKeywords(text) {
@@ -431,6 +432,7 @@
         document.body.appendChild(popupDiv);
         popupDiv.appendChild(toggleButton);
         popupDiv.appendChild(applyButton);
+        popupDiv.appendChild(singleApplyButton);
         popupDiv.appendChild(helpButton);
         popupDiv.appendChild(autoFillButton1);
         popupDiv.appendChild(autoFillButton2);
@@ -569,9 +571,9 @@
     }
     
     // Function to create the "Run Auto Apply" button
-    function createApplyButton() {
+    function createSingleApplyButton() {
         const applyButton = document.createElement('button');
-        applyButton.textContent = 'Run Auto Apply';
+        applyButton.textContent = 'Single Auto Apply';
         applyButton.style.cssText = `
             margin-right: 5px;
             background-color: #fff;
@@ -589,6 +591,26 @@
         return applyButton;
     }
     
+    function createApplyButton() {
+        const applyButton = document.createElement('button');
+        applyButton.textContent = 'Multi Auto Apply';
+        applyButton.style.cssText = `
+            margin-right: 5px;
+            background-color: #fff;
+            color: #0077B5.;
+            padding: 10px;
+            border: 1px solid #FFFFFF;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            border: solid;
+            color: #000 !important;
+        `;
+        applyButton.classList.add('linkedin-only')
+        return applyButton;
+    }
+
     function createAutoFill1() {
         const applyButton = document.createElement('button');
         applyButton.textContent = 'Auto Fill 1';
@@ -689,7 +711,7 @@
     
     
     
-    function togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply) {
+    function togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton) {
         if (popupDiv.style.height === 'auto' || popupDiv.style.height === '') {
             popupDiv.style.height = '50px';
             toggleButton.textContent = '▲';
@@ -698,6 +720,7 @@
             autoFillButton1.style.display = 'none';
             autoFillButton2.style.display = 'none';
             aiApply.style.display = 'none';
+            singleApplyButton.style.display = 'none';
     
         } else {
             popupDiv.style.height = 'auto';
@@ -707,6 +730,7 @@
             autoFillButton1.style.display = 'inline-block';
             autoFillButton2.style.display = 'inline-block';
             aiApply.style.display = 'inline-block';
+            singleApplyButton.style.display = 'inline-block';
                 
         }
     }

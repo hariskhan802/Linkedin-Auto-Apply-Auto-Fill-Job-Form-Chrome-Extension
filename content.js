@@ -514,7 +514,7 @@ async function checkAndPromptFields() {
 }
 
 
-async function runScript() {
+async function runScript(singleJob = false) {
     const fieldsComplete = await checkAndPromptFields();
     if (!fieldsComplete) {
         chrome.runtime.sendMessage({ action: 'openDefaultInputPage' });
@@ -527,15 +527,22 @@ async function runScript() {
         toggleBlinkingBorder(feedbackMessageElement);
         return;
     }
+    if(!singleJob)
+        await jobPanelScroll();
     
-    await jobPanelScroll();
     await addShortDelay();
-    const listItems = document.querySelectorAll('.scaffold-layout__list-item');
+    const listItems = singleJob ? document.querySelectorAll('.scaffold-layout__list-item .jobs-search-results-list__list-item--active') : document.querySelectorAll('.scaffold-layout__list-item');
     
+    if(listItems.length === 0 && singleJob)
+        alert('Please select a job for single apply')
+
     for (const listItem of listItems) {
         await clickJob(listItem);
     }
-    await goToNextPage();
+    if(singleJob)
+        alert('Single Job Applied Successfully')
+    else 
+        await goToNextPage();
 }
 window.onload = async() => {
     const isLinkedIn = window?.location?.href?.includes('linkedin.com');

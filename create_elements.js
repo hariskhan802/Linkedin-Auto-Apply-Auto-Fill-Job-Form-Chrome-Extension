@@ -566,6 +566,8 @@
             height: auto;
             max-height: 200px;
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         `;
         return popupDiv;
     }

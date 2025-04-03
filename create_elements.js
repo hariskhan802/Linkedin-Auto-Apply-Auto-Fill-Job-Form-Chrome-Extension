@@ -563,7 +563,7 @@
             padding: 20px;
             border-radius: 5px;
             z-index: 99999999999;
-            height: auto;
+            height: 200px;
             max-height: 200px;
             transition: all 0.3s;
             display: flex;
@@ -588,6 +588,7 @@
             font-weight: bold;
             border: solid;
             color: #000 !important;
+            display: none;
         `;
         applyButton.classList.add('linkedin-only')
         return applyButton;
@@ -608,6 +609,7 @@
             font-weight: bold;
             border: solid;
             color: #000 !important;
+            display: none;
         `;
         applyButton.classList.add('linkedin-only')
         return applyButton;
@@ -628,6 +630,7 @@
             font-weight: bold;
             border: solid;
             color: #000 !important;
+            display: none;
         `;
         applyButton.classList.add('linkedin-only')
         return applyButton;
@@ -648,6 +651,7 @@
             font-weight: bold;
             border: solid;
             color: #000 !important;
+            display: none;
         `;
         applyButton.classList.add('linkedin-only')
         return applyButton;
@@ -668,6 +672,7 @@
             font-weight: bold;
             border: solid;
             color: #000 !important;
+            display: none;
         `;
         applyButton.classList.add('linkedin-only')
         return applyButton;
@@ -676,7 +681,7 @@
     // Function to create the toggle button
     function createToggleButton() {
         const toggleButton = document.createElement('button');
-        toggleButton.textContent = '▼';
+        toggleButton.textContent = '▲';
         toggleButton.style.cssText = `
             background-color: rgb(255, 255, 255);
             padding: 0px;
@@ -716,7 +721,7 @@
     function togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton) {
         if (popupDiv.style.height === 'auto' || popupDiv.style.height === '') {
             popupDiv.style.height = '50px';
-            toggleButton.textContent = '▲';
+            toggleButton.textContent = '▼';
             applyButton.style.display = 'none';
             helpButton.style.display = 'none';
             autoFillButton1.style.display = 'none';
@@ -726,9 +731,9 @@
     
         } else {
             popupDiv.style.height = 'auto';
-            toggleButton.textContent = '▼';
+            toggleButton.textContent = '▲';
             applyButton.style.display = 'inline-block';
-            helpButton.style.display = 'inline-block';
+            helpButton.style.display = 'none';
             autoFillButton1.style.display = 'inline-block';
             autoFillButton2.style.display = 'inline-block';
             aiApply.style.display = 'inline-block';

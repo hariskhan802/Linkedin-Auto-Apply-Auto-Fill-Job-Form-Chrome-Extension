@@ -43,34 +43,31 @@ async function jobPanelScrollLittle() {
     }
 }
 
-async function setLeadData (platform, listItem = null, jobTitleLink=null) {
+async function setLeadData(platform, listItem = null, jobTitleLink = null) {
     let company = listItem?.querySelector('.artdeco-entity-lockup__subtitle.ember-view')?.textContent?.trim()
     let jobTitle = jobTitleLink?.querySelector('span')?.textContent?.trim()
     let payload = {
-        applyLink : window.location.href,
+        applyLink: window.location.href,
         jobTitle: jobTitle?.trim(),
         company: company,
         platform: platform,
-        leadStatus: "Pending",
-        leadStage: "Applied",
-        prospectContact: '',
-        profileId: 9, // changed
-        leadGen: 1, // changed
-        jobType: "Remote" // changed
+        profileName: localStorage.getItem('profileName'),
+        employeeName: localStorage.getItem('employeeName'),
+        jobType: "Remote"
 
     }
     localStorage.setItem('cJob', JSON.stringify(payload))
 }
 
 async function clickJob(listItem) {
-    console.log({listItem});
-    
+    console.log({ listItem });
+
     const jobTitleLink = listItem.querySelector(
         '.artdeco-entity-lockup__title .job-card-container__link'
-      );
+    );
     //   console.log({jobTitleLink});
     if (jobTitleLink) {
-        setLeadData('LinkedIn', listItem, jobTitleLink)        
+        setLeadData('LinkedIn', listItem, jobTitleLink)
         jobTitleLink.click();
         await runFindEasyApply();
 
@@ -109,7 +106,7 @@ async function performInputFieldChecks() {
         if (label) {
 
             labelText = label.textContent.trim();
-            
+
             const foundConfig = result.find(config => config.placeholderIncludes === labelText);
 
             if (foundConfig) {
@@ -331,37 +328,30 @@ location.hostname.includes('shein.com') && r('s');
 
 
 async function createLead() {
-    const headers = new Headers();
-    // headers.append("Accept", "application/json");
-    // headers.append("Content-Type", "application/json");
+    
+    const raw = JSON.parse(localStorage.getItem('cJob'));
+    chrome.runtime.sendMessage(
+        {
+            type: "LOG_APPLICATION",
+            payload: {
+                jobUrl: raw.applyLink,
+                jobTitle: raw.jobTitle,
+                company: raw.company,
+                platform: raw.platform,
+                profileName: raw.profileName,
+                employeeName: raw.employeeName,
+                status: "submitted"
+            }
+        },
+        response => {
+            if (response.success) {
+                console.log("Logged OK:", response.data);
+            } else {
+                console.error("Logging failed:", response.error);
+            }
+        }
+    );
 
-    headers.append("Accept", "application/json");
-    headers.append("Accept-Language", "en-US,en;q=0.9");
-    headers.append("Connection", "keep-alive");
-    headers.append("Content-Type", "application/json");
-    headers.append("Origin", "https://stagingrsbackend.codesytech.com");
-    headers.append("Referer", "https://stagingrsbackend.codesytech.com/");
-    headers.append("Sec-Fetch-Dest", "empty");
-    headers.append("Sec-Fetch-Mode", "cors");
-    headers.append("Sec-Fetch-Site", "same-site");
-    headers.append("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
-    headers.append("sec-ch-ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
-    headers.append("sec-ch-ua-mobile", "?0");
-    headers.append("sec-ch-ua-platform", "\"macOS\"");
-    const raw = localStorage.getItem('cJob');
-      
-      const requestOptions = {
-        method: "POST",
-        headers: headers,
-        body: raw,
-        redirect: "follow",
-        mode: "cors",
-      };
-      const apiUrl = "https://stagingrsbackend.codesytech.com/leads"
-      return fetch(apiUrl, requestOptions)
-        .then((response) => response.json())
-        .then((result) => result)
-        .catch((error) => error);
 }
 
 async function runApplyModel() {
@@ -369,18 +359,18 @@ async function runApplyModel() {
     await addDelay();
 
     await performSafetyReminderCheck();
-    
+
     const continueApplyingButton = document.querySelector('button[aria-label="Continue applying"]');
-   
+
     if (continueApplyingButton) {
         continueApplyingButton.click();
         runApplyModel();
     }
 
     const nextButton = Array.from(document.querySelectorAll('button')).find(button => button.textContent.includes('Next'));
-    
+
     const reviewButton = document.querySelector('button[aria-label="Review your application"]');
-   
+
     const submitButton = document.querySelector('button[aria-label="Submit application"]');
 
     if (submitButton) {
@@ -393,7 +383,7 @@ async function runApplyModel() {
         await addDelay();
 
         const modalCloseButton = document.querySelector('.artdeco-modal__dismiss');
-        
+
         if (modalCloseButton) {
             modalCloseButton.click();
             return;
@@ -441,7 +431,7 @@ async function goToNextPage() {
             }, 2000);
         }).then(runScript);
     }
-    
+
 }
 
 
@@ -453,9 +443,9 @@ function toggleBlinkingBorder(element) {
         count++;
         if (count === 10) {
             clearInterval(intervalId);
-            element.style.border = 'none'; 
+            element.style.border = 'none';
         }
-    }, 500); 
+    }, 500);
 }
 
 async function checkLimitReached() {
@@ -527,34 +517,34 @@ async function runScript(singleJob = false) {
         toggleBlinkingBorder(feedbackMessageElement);
         return;
     }
-    if(!singleJob)
+    if (!singleJob)
         await jobPanelScroll();
-    
+
     await addShortDelay();
     const listItems = singleJob ? document.querySelectorAll('.scaffold-layout__list-item .jobs-search-results-list__list-item--active') : document.querySelectorAll('.scaffold-layout__list-item');
-    
-    if(listItems.length === 0 && singleJob)
+
+    if (listItems.length === 0 && singleJob)
         alert('Please select a job for single apply')
 
     for (const listItem of listItems) {
         await clickJob(listItem);
     }
-    if(singleJob)
+    if (singleJob)
         alert('Single Job Applied Successfully')
-    else 
+    else
         await goToNextPage();
 }
-window.onload = async() => {
+window.onload = async () => {
     const isLinkedIn = window?.location?.href?.includes('linkedin.com');
-    chrome.storage.local.get(['allowExternal'], function(result) {
+    chrome.storage.local.get(['allowExternal'], function (result) {
         console.log('result.allowExternal', result.allowExternal);
-        
-        if (isLinkedIn === false && (result.allowExternal === false || result.allowExternal === null) ) {
+
+        if (isLinkedIn === false && (result.allowExternal === false || result.allowExternal === null)) {
             const elements = document.querySelectorAll('.linkedin-only')
             for (let element of elements) {
                 element.style.display = 'none';
             }
         }
-    })    
+    })
 }
 

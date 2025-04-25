@@ -5,6 +5,25 @@ let currentInputFieldConfigs = [];
 
 chrome.runtime.onConnect.addListener(port => {});
 
+
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === "LOG_APPLICATION") {
+      fetch("https://script.google.com/macros/s/AKfycbzV8yEPW_uz1z2iMxAoWjgBOAd_4a6aggLMt9WelgDFT8tnp_TX9R8VlObMsablFCnxdQ/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msg.payload)
+      })
+      .then(res => res.json())
+      .then(data => sendResponse({ success: true, data }))
+      .catch(err => sendResponse({ success: false, error: err.message }));
+      
+      // keep the message channel open for async response:
+      return true;
+    }
+  });
+  
+
 //INITIAL LOAD
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'initStorage') {

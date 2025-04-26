@@ -46,13 +46,15 @@ async function jobPanelScrollLittle() {
 async function setLeadData(platform, listItem = null, jobTitleLink = null) {
     let company = listItem?.querySelector('.artdeco-entity-lockup__subtitle.ember-view')?.textContent?.trim()
     let jobTitle = jobTitleLink?.querySelector('span')?.textContent?.trim()
+    let {profileName, employeeName} = await chrome.storage.local.get(['profileName', 'employeeName'])
+    
     let payload = {
         applyLink: window.location.href,
         jobTitle: jobTitle?.trim(),
         company: company,
         platform: platform,
-        profileName: localStorage.getItem('profileName'),
-        employeeName: localStorage.getItem('employeeName'),
+        profileName: profileName,
+        employeeName: employeeName,
         jobType: "Remote"
 
     }
@@ -60,8 +62,7 @@ async function setLeadData(platform, listItem = null, jobTitleLink = null) {
 }
 
 async function clickJob(listItem) {
-    console.log({ listItem });
-
+    
     const jobTitleLink = listItem.querySelector(
         '.artdeco-entity-lockup__title .job-card-container__link'
     );
@@ -355,7 +356,7 @@ async function createLead() {
 }
 
 async function runApplyModel() {
-
+   
     await addDelay();
 
     await performSafetyReminderCheck();
@@ -406,6 +407,7 @@ async function runApplyModel() {
 }
 
 async function runFindEasyApply() {
+    
     await addShortDelay();
 
     const buttons = document.querySelectorAll('button');
@@ -505,6 +507,13 @@ async function checkAndPromptFields() {
 
 
 async function runScript(singleJob = false) {
+    
+    const {profileName, employeeName} = await chrome.storage.local.get(['profileName', 'employeeName']);
+    
+    if (!profileName || !profileName) {
+        alert('Please set your profile name in the extension settings.');
+        return;
+    }
     const fieldsComplete = await checkAndPromptFields();
     if (!fieldsComplete) {
         chrome.runtime.sendMessage({ action: 'openDefaultInputPage' });

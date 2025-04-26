@@ -11,21 +11,37 @@
 <body>
     <div class="container">
         <h2 class="title">Auto Apply</h2>
+        <form id="form" class="form"  >
+            <label for="profile_name">Profile Name</label>
+            <input type="text" id="profile_name" name="profile_name" placeholder="Profile Name" required>
+            <br>
+            <br>
+            <label for="email">Your name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter Name" required>
+            <br>
+            <br>
+            
+            <button type="button" class="button" id="save-user-info">Save</button>
+        </form>
+        <br>
+        <br>
         <button id="settings-button" class="button"><span>Questions</span></button>
         <br>
         <br>
-        <button id="default-button" class="button">Personal Info</button>
+        <button id="default-button" class="button" >Personal Info</button>
         <br>
         <br>
         <div class="allow-external"></div>
         <br>
         <br>
+
         <div>
             <h2>Export & Import Data</h2>
             <button id="exportButton">Export Data</button>
             <input type="file" id="importFileInput" accept=".json">
         </div>
     </div>
+
     <script src="popup.js"></script>
 </body>
 

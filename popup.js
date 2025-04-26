@@ -8,6 +8,18 @@ defaultButton.addEventListener('click', function () {
     chrome.tabs.create({ url: 'defaultInput.html' });
 });
 
+    chrome.storage.local.get(['profileName'], result => {
+        profileName = result.profileName || '';
+        document.getElementById('profile_name').value = profileName;
+        console.log({profileName});
+        
+    })
+    chrome.storage.local.get(['employeeName'], result => {
+        employeeName = result.employeeName || [];
+        document.getElementById('name').value = employeeName;
+        console.log({employeeName});
+        
+    })
 
 function importData(file) {
     const reader = new FileReader();
@@ -42,6 +54,17 @@ document.getElementById('importFileInput').addEventListener('change', (event) =>
     }
 });
 
+document.getElementById('save-user-info').addEventListener('click', () => {
+    const profileName = document.getElementById('profile_name').value;
+    const name = document.getElementById('name').value;
+
+    chrome.storage.local.set({ 'profileName': profileName, employeeName: name }, () => {
+        profileName = profileName;
+        employeeName = name;
+    });
+    alert('User information saved successfully!');
+    return false
+});
 
 function exportData() {
     chrome.storage.local.get(null, (data) => {

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        fetch("https://script.google.com/macros/s/AKfycbzdHmKt224W4Q-A2yxcbrGTBF3kTOIFoILWDpnRnPz8B0kgTO-5skJN8QDy88o9dmG8Cw/exec")
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched Records:", data);
+            })
+            .catch(console.error);
+
+    </script>
+</body>
+
+</html>m

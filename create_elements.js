@@ -732,7 +732,7 @@
         } else {
             popupDiv.style.height = 'auto';
             toggleButton.textContent = '▲';
-            applyButton.style.display = 'inline-block';
+            applyButton.style.display = 'none';
             helpButton.style.display = 'none';
             autoFillButton1.style.display = 'inline-block';
             autoFillButton2.style.display = 'inline-block';

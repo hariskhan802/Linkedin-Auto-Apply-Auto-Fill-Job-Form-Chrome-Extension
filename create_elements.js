@@ -104,11 +104,12 @@
         const autoFillButton2 = createAutoFill2()
         const aiApply = createAiApply()
         const singleApplyButton = createSingleApplyButton()
+        const exportLeadButton = createExportLeadButton()
         const helpButton = createHelpButton();
     
     
         toggleButton.addEventListener('click', () => {
-            togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton);
+            togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton, exportLeadButton);
         });
 
         async function runAutoApplyScript (singleJob = false) {
@@ -132,7 +133,128 @@
         singleApplyButton.addEventListener('click', async () => {
             await runAutoApplyScript(true)
         });
-    
+        
+        exportLeadButton.addEventListener('click', async () => {
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            const scrollToBottomUntilStable = async (step = 300, delay = 1500, maxIdle = 3) => {
+                const container = document.querySelector('#search-results-container');
+                let lastHeight = -1;
+                let idleCount = 0;
+
+                while (idleCount < maxIdle) {
+                container.scrollTop += step;
+                await wait(delay);
+
+                const currentHeight = container.scrollHeight;
+                if (currentHeight === lastHeight) {
+                    idleCount++;
+                } else {
+                    idleCount = 0;
+                    lastHeight = currentHeight;
+                }
+                }
+            };
+
+            const waitForCondition = (fn, timeout = 10000, interval = 200) => {
+                const start = performance.now();
+                return new Promise((resolve, reject) => {
+                const check = () => {
+                    try {
+                    if (fn()) return resolve();
+                    } catch {}
+                    if (performance.now() - start > timeout) {
+                    return reject(new Error('Timeout waiting for condition'));
+                    }
+                    setTimeout(check, interval);
+                };
+                check();
+                });
+            };
+
+            const extractLeadInfo = (card) => {
+                const nameEl = card.querySelector('span[data-anonymize="person-name"]');
+                const linkEl = card.querySelector('a[data-control-name="view_lead_panel_via_search_lead_name"]');
+                const name = nameEl?.textContent.trim() ?? null;
+                const relUrl = linkEl?.getAttribute('href') ?? null;
+                const profileUrl = relUrl ? `https://www.linkedin.com${relUrl}` : null;
+                const string = profileUrl.split('/').pop()
+                const linkedinId = string.split(',')?.[0]
+                const linkdinUrl = `https://www.linkedin.com/in/${linkedinId}`
+                return name && profileUrl && linkdinUrl ? { name, profileUrl, linkdinUrl } : null;
+            };
+
+            const extractCurrentPageLeads = () => {
+                return Array.from(document.querySelectorAll('[data-x-search-result="LEAD"]'))
+                .map(extractLeadInfo)
+                .filter(Boolean);
+            };
+
+            const goToNextPage = async () => {
+                const nextBtn = document.querySelector('button[aria-label="Next"]');
+                if (!nextBtn || nextBtn.disabled) return false;
+
+                const indicator = document.querySelector('.artdeco-pagination__indicator--current');
+                const oldPage = indicator ? parseInt(indicator.textContent.trim(), 10) : null;
+                nextBtn.click();
+                await wait(1000);
+
+                if (oldPage !== null) {
+                await waitForCondition(() => {
+                    const cur = document.querySelector('.artdeco-pagination__indicator--current');
+                    return cur && parseInt(cur.textContent.trim(), 10) > oldPage;
+                }, 100000);
+                }
+
+                await waitForCondition(() => document.querySelector('[data-x-search-result="LEAD"]'), 100000);
+                return true;
+            };
+
+            const allLeads = [];
+            // const container = document.querySelector('#search-results-container');
+            // if (!container) {
+            //   console.error('❌ Could not find scrollable container.');
+            //   return;
+            // }
+
+            // container.scrollIntoView();
+
+            let page = 1;
+            do {
+                console.log(`📄 Scraping page ${page}...`);
+                // await wait(2000);      
+                await scrollToBottomUntilStable(300, 600, 3);
+                await wait(500);      
+
+                const leads = extractCurrentPageLeads();
+                console.log(`➡️ Found ${leads.length} leads on page ${page}`);
+                console.log({leads});
+                allLeads.push(...leads);
+
+                page++;
+            } while (await goToNextPage());
+
+            console.log(`✅ Total leads extracted: ${allLeads.length}`);
+
+            const csvRows = [
+                ['Name', 'Profile URL'],
+                ...allLeads.map(l => [l.name, l.profileUrl])
+            ];
+            const csv = csvRows.map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'linkedin_leads.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log('📥 CSV download complete.');
+
+        });
     
         function extractKeywords(text) {
             // Convert to lowercase, remove non-alphabetic characters, split into words
@@ -432,6 +554,7 @@
         document.body.appendChild(popupDiv);
         popupDiv.appendChild(toggleButton);
         popupDiv.appendChild(applyButton);
+        popupDiv.appendChild(exportLeadButton);
         popupDiv.appendChild(singleApplyButton);
         popupDiv.appendChild(helpButton);
         popupDiv.appendChild(autoFillButton1);
@@ -560,11 +683,10 @@
             right: 10px;
             transform: translate(0, -50%);
             color: #fff;
-            padding: 20px;
             border-radius: 5px;
             z-index: 99999999999;
-            height: 200px;
-            max-height: 200px;
+            max-height: 250px;
+            height: 250px;
             transition: all 0.3s;
             display: flex;
             flex-direction: column;
@@ -576,6 +698,28 @@
     function createSingleApplyButton() {
         const applyButton = document.createElement('button');
         applyButton.textContent = 'Single Auto Apply';
+        applyButton.style.cssText = `
+            margin-right: 5px;
+            background-color: #fff;
+            color: #0077B5.;
+            padding: 10px;
+            border: 1px solid #FFFFFF;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            border: solid;
+            color: #000 !important;
+            display: none;
+        `;
+        applyButton.classList.add('linkedin-only')
+        return applyButton;
+    }
+
+    // Function to create the "Export Lead" button
+    function createExportLeadButton() {
+        const applyButton = document.createElement('button');
+        applyButton.textContent = 'Export Lead';
         applyButton.style.cssText = `
             margin-right: 5px;
             background-color: #fff;
@@ -718,7 +862,7 @@
     
     
     
-    function togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton) {
+    function togglePopupHeight(popupDiv, toggleButton, applyButton, helpButton, autoFillButton1, autoFillButton2, aiApply, singleApplyButton, exportLeadButton) {
         if (popupDiv.style.height === 'auto' || popupDiv.style.height === '') {
             popupDiv.style.height = '50px';
             toggleButton.textContent = '▼';
@@ -728,6 +872,7 @@
             autoFillButton2.style.display = 'none';
             aiApply.style.display = 'none';
             singleApplyButton.style.display = 'none';
+            exportLeadButton.style.display = 'none';
     
         } else {
             popupDiv.style.height = 'auto';
@@ -738,6 +883,6 @@
             autoFillButton2.style.display = 'inline-block';
             aiApply.style.display = 'inline-block';
             singleApplyButton.style.display = 'inline-block';
-                
+            exportLeadButton.style.display = 'inline-block';    
         }
     }
